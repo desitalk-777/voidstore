@@ -1,9 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import { db } from './firebase';
-import { collection, addDoc, onSnapshot, deleteDoc, doc } from 'firebase/firestore';
+import { collection, addDoc, onSnapshot, deleteDoc, doc, updateDoc } from 'firebase/firestore';
 
 export default function Admin() {
-  const [formData, setFormData] = useState({ name: '', price: '', desc: '', img: '', cat: 'ott', stock: '10' });
+  const [formData, setFormData] = useState({ name: '', price: '', desc: '', img: '', cat: 'ott', stock: 10 });
   const [products, setProducts] = useState([]);
 
   useEffect(() => {
@@ -15,36 +15,44 @@ export default function Admin() {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    await addDoc(collection(db, "products"), {
-      ...formData,
-      stock: Number(formData.stock) // Aapka manual stock yahan se jayega
-    });
-    alert("Live ho gaya!");
-    setFormData({ name: '', price: '', desc: '', img: '', cat: 'ott', stock: '10' });
+    await addDoc(collection(db, "products"), { ...formData, stock: Number(formData.stock) });
+    alert("New Product Live!");
+  };
+
+  // ✅ Purane Products ka Stock Update karne ke liye function
+  const handleUpdateStock = async (id, newStock) => {
+    const productRef = doc(db, "products", id);
+    await updateDoc(productRef, { stock: Number(newStock) });
+    alert("Stock Updated!");
   };
 
   return (
-    <div style={{ padding: '40px', maxWidth: '600px', margin: 'auto', color: 'white' }}>
-      <h2 style={{ color: '#a855f7' }}>Inventory Manager</h2>
-      <form onSubmit={handleSubmit} style={{ display: 'grid', gap: '15px', marginTop: '20px' }}>
-        <input placeholder="Product Name" value={formData.name} onChange={e => setFormData({...formData, name: e.target.value})} style={inputStyle} />
-        <input placeholder="Price" value={formData.price} onChange={e => setFormData({...formData, price: e.target.value})} style={inputStyle} />
-        <input placeholder="Description" value={formData.desc} onChange={e => setFormData({...formData, desc: e.target.value})} style={inputStyle} />
-        <input placeholder="Image URL" value={formData.img} onChange={e => setFormData({...formData, img: e.target.value})} style={inputStyle} />
-        <input type="number" placeholder="Stock Quantity (0 for Sold Out)" value={formData.stock} onChange={e => setFormData({...formData, stock: e.target.value})} style={inputStyle} />
-        <select value={formData.cat} onChange={e => setFormData({...formData, cat: e.target.value})} style={inputStyle}>
-          <option value="ott">OTT</option>
-          <option value="gaming">Gaming</option>
-          <option value="ai">AI</option>
-        </select>
-        <button type="submit" style={{ padding: '15px', background: '#a855f7', border: 'none', color: 'white', fontWeight: 'bold', cursor: 'pointer' }}>ADD PRODUCT</button>
+    <div className="page-fade" style={{ padding: '40px', maxWidth: '800px', margin: 'auto', color: 'white' }}>
+      <h2>Admin Control</h2>
+      
+      {/* Add Form (Same as before) */}
+      <form onSubmit={handleSubmit} style={{ display: 'grid', gap: '10px', marginTop: '20px' }}>
+         <input placeholder="Name" value={formData.name} onChange={e => setFormData({...formData, name: e.target.value})} style={inputStyle} />
+         <input placeholder="Price" value={formData.price} onChange={e => setFormData({...formData, price: e.target.value})} style={inputStyle} />
+         <input placeholder="Stock" type="number" value={formData.stock} onChange={e => setFormData({...formData, stock: e.target.value})} style={inputStyle} />
+         <button type="submit" style={{ padding: '12px', background: '#a855f7', border: 'none', color: 'white', cursor: 'pointer' }}>ADD PRODUCT</button>
       </form>
 
-      <div style={{ marginTop: '30px' }}>
+      {/* ✅ Inventory List with Live Stock Edit */}
+      <h3 style={{ marginTop: '40px' }}>Manage Existing Products</h3>
+      <div style={{ display: 'grid', gap: '15px', marginTop: '10px' }}>
         {products.map(p => (
-          <div key={p.id} style={{ display: 'flex', justifyContent: 'space-between', padding: '10px', borderBottom: '1px solid #222' }}>
-            <span>{p.name} (Qty: {p.stock})</span>
-            <button onClick={() => deleteDoc(doc(db, "products", p.id))} style={{ color: 'red', background: 'none', border: 'none', cursor: 'pointer' }}>Delete</button>
+          <div key={p.id} className="glass" style={{ display: 'flex', justifyContent: 'space-between', padding: '15px', alignItems: 'center' }}>
+            <span>{p.name}</span>
+            <div style={{ display: 'flex', gap: '10px' }}>
+              <input 
+                type="number" 
+                defaultValue={p.stock} 
+                onBlur={(e) => handleUpdateStock(p.id, e.target.value)} 
+                style={{ width: '60px', padding: '5px', background: '#222', color: '#fff', border: '1px solid #444' }}
+              />
+              <button onClick={() => deleteDoc(doc(db, "products", p.id))} style={{ color: 'red', background: 'none', border: 'none', cursor: 'pointer' }}>Delete</button>
+            </div>
           </div>
         ))}
       </div>
