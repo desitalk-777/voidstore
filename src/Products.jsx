@@ -4,25 +4,20 @@ import { collection, onSnapshot } from 'firebase/firestore';
 
 export default function Products() {
   const [items, setItems] = useState([]);
+  const [loading, setLoading] = useState(true);
   const [filter, setFilter] = useState('all');
 
   useEffect(() => {
     const unsub = onSnapshot(collection(db, "products"), (snap) => {
       setItems(snap.docs.map(doc => ({ ...doc.data(), id: doc.id })));
+      setLoading(false);
     });
     return () => unsub();
   }, []);
 
   const handleBuy = (item) => {
-    const phone = "91XXXXXXXXXX"; // 👈 Apna Number yahan dalo!
-    const text = `*New Order from VoidStore* 🚀
-----------------------------
-*Product:* ${item.name}
-*Price:* ₹${item.price}
-*Details:* ${item.description || 'Premium Service'}
-----------------------------
-Bhai, is this available?`;
-
+    const phone = "919596491283"; // Apna real number dalo
+    const text = `*Order Request* 🛒\n*Product:* ${item.name}\n*Price:* ₹${item.price}\n*Details:* ${item.description}\n\nBhai, stock mein hai?`;
     window.open(`https://wa.me/${phone}?text=${encodeURIComponent(text)}`, '_blank');
   };
 
@@ -31,47 +26,50 @@ Bhai, is this available?`;
   return (
     <div style={{ padding: '0 8% 100px' }}>
       
-      {/* Category Tabs */}
-      <div style={{ display: 'flex', gap: '12px', marginBottom: '50px', justifyContent: 'center', flexWrap: 'wrap' }}>
+      {/* Categories */}
+      <div style={{ display: 'flex', gap: '10px', margin: '40px 0', justifyContent: 'center' }}>
         {['all', 'gaming', 'ott', 'ai'].map(cat => (
-          <button key={cat} onClick={() => setFilter(cat)}
-            style={{ padding: '10px 24px', borderRadius: '30px', border: 'none', background: filter === cat ? '#a855f7' : 'rgba(255,255,255,0.05)', color: filter === cat ? '#fff' : '#888', cursor: 'pointer', fontWeight: 'bold' }}>
+          <button key={cat} onClick={() => setFilter(cat)} style={{ padding: '10px 20px', borderRadius: '20px', border: 'none', background: filter === cat ? '#a855f7' : '#111', color: 'white', cursor: 'pointer' }}>
             {cat.toUpperCase()}
           </button>
         ))}
       </div>
 
-      {/* Product Grid */}
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))', gap: '25px' }}>
-        {filteredItems.map(item => (
-          <div key={item.id} className="glass" style={{ padding: '25px', position: 'relative', opacity: item.stock > 0 ? 1 : 0.7 }}>
-            
-            {/* Stock Badge */}
-            <div style={{ position: 'absolute', top: '15px', right: '15px', padding: '4px 10px', borderRadius: '5px', fontSize: '10px', fontWeight: 'bold', background: item.stock > 0 ? '#22c55e' : '#ef4444' }}>
-              {item.stock > 0 ? `STOCK: ${item.stock}` : "SOLD OUT"}
-            </div>
+        
+        {/* 💀 Skeleton Loading Animation */}
+        {loading ? [1, 2, 3].map(n => (
+          <div key={n} className="glass skeleton" style={{ height: '400px', padding: '25px' }}></div>
+        )) : (
+          filteredItems.map(item => (
+            <div key={item.id} className="glass" style={{ padding: '25px', position: 'relative', opacity: item.stock > 0 ? 1 : 0.6 }}>
+              
+              {/* Manual Stock Badge */}
+              <div style={{ position: 'absolute', top: '15px', right: '15px', padding: '5px 10px', borderRadius: '5px', fontSize: '10px', background: item.stock > 0 ? '#22c55e' : '#ef4444' }}>
+                {item.stock > 0 ? `IN STOCK: ${item.stock}` : "OUT OF STOCK"}
+              </div>
 
-            <div style={{ width: '100%', height: '180px', background: '#111', borderRadius: '15px', marginBottom: '20px', display: 'flex', alignItems: 'center', justifyContent: 'center', overflow: 'hidden' }}>
-              <img src={item.image} alt={item.name} style={{ maxWidth: '70%', maxHeight: '70%', objectFit: 'contain' }} />
-            </div>
+              <div style={{ height: '180px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                <img src={item.image} alt={item.name} style={{ maxWidth: '80%', maxHeight: '80%', objectFit: 'contain' }} />
+              </div>
 
-            <div style={{ flexGrow: 1, display: 'flex', flexDirection: 'column' }}>
-              <span style={{ color: '#a855f7', fontSize: '11px', fontWeight: '800' }}>{item.category?.toUpperCase()}</span>
-              <h3 style={{ fontSize: '22px', margin: '10px 0', fontWeight: '700', color: '#fff' }}>{item.name}</h3>
-              <p style={{ color: '#aaa', fontSize: '13px', marginBottom: '15px', minHeight: '40px' }}>{item.description}</p>
-              <h2 style={{ fontSize: '26px', marginBottom: '20px', color: '#00ffff', fontWeight: '900' }}>₹{item.price}</h2>
+              <div style={{ margin: '20px 0' }}>
+                <h3 style={{ fontSize: '20px' }}>{item.name}</h3>
+                <p style={{ color: '#aaa', fontSize: '12px', margin: '10px 0' }}>{item.description}</p>
+                <h2 style={{ color: '#00ffff' }}>₹{item.price}</h2>
+              </div>
+              
+              <button 
+                disabled={item.stock <= 0}
+                onClick={() => handleBuy(item)} 
+                className="buy-btn"
+                style={{ background: item.stock > 0 ? '#fff' : '#222', cursor: item.stock > 0 ? 'pointer' : 'not-allowed' }}
+              >
+                {item.stock > 0 ? "BUY NOW" : "SOLD OUT"}
+              </button>
             </div>
-            
-            <button 
-              disabled={item.stock <= 0}
-              onClick={() => handleBuy(item)} 
-              className="buy-btn"
-              style={{ background: item.stock > 0 ? '#fff' : '#333', cursor: item.stock > 0 ? 'pointer' : 'not-allowed' }}
-            >
-              {item.stock > 0 ? "BUY NOW" : "OUT OF STOCK"}
-            </button>
-          </div>
-        ))}
+          ))
+        )}
       </div>
     </div>
   );

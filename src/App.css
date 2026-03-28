@@ -2,91 +2,43 @@
   margin: 0;
   padding: 0;
   box-sizing: border-box;
-  font-family: 'Inter', -apple-system, sans-serif;
+  font-family: 'Inter', sans-serif;
 }
 
 body {
   background: #000;
   color: white;
-  overflow-x: hidden;
 }
 
-/* Page transitions */
-.page-fade {
-  animation: fadeIn 0.5s ease-in-out;
-}
-
-@keyframes fadeIn {
-  from { opacity: 0; }
-  to { opacity: 1; }
-}
-
-/* 🟢 Glassmorphism Card Fix */
 .glass {
   background: rgba(255, 255, 255, 0.03);
   backdrop-filter: blur(15px);
-  border: 1px solid rgba(255, 255, 255, 0.08);
+  border: 1px solid rgba(255, 255, 255, 0.1);
   border-radius: 20px;
   display: flex;
   flex-direction: column;
-  height: 100%; /* Ensures all cards in a row are same height */
+  height: 100%;
   transition: 0.3s ease;
 }
 
-.glass:hover {
-  transform: translateY(-8px);
-  border: 1px solid rgba(168, 85, 247, 0.3);
-  box-shadow: 0 10px 30px rgba(168, 85, 247, 0.1);
+/* ⚡ Skeleton Animation */
+@keyframes pulse {
+  0% { opacity: 0.3; }
+  50% { opacity: 0.6; }
+  100% { opacity: 0.3; }
 }
 
-/* Navbar links */
-.nav-link {
-  color: #888;
-  text-decoration: none;
-  font-weight: 600;
-  transition: 0.3s;
-  cursor: pointer;
-  padding: 8px 12px;
-  border-radius: 8px;
-  font-size: 14px;
+.skeleton {
+  animation: pulse 1.5s infinite ease-in-out;
+  background: #111 !important;
 }
 
-.nav-link:hover, .nav-link.active {
-  color: #a855f7;
-  background: rgba(168, 85, 247, 0.1);
-}
-
-.login-btn {
-  background: #fff;
-  color: #000;
-  border: none;
-  padding: 8px 20px;
-  border-radius: 10px;
-  font-weight: 900;
-  cursor: pointer;
-  transition: 0.2s;
-}
-
-.login-btn:hover {
-  transform: scale(1.05);
-  box-shadow: 0 0 15px rgba(255,255,255,0.3);
-}
-
-/* 🔵 Buy Button Fix */
 .buy-btn {
   width: 100%;
   padding: 14px;
   border-radius: 12px;
   border: none;
-  background: #fff;
-  color: #000;
   font-weight: 900;
-  cursor: pointer;
-  margin-top: auto; /* Pushes button to the bottom of the card */
+  margin-top: auto;
   transition: 0.3s;
-}
-
-.buy-btn:hover {
-  background: #a855f7;
-  color: white;
 }
