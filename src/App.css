@@ -1,6 +1,6 @@
-/* ✨ Global Animations */
+/* ✨ Page Transitions */
 .page-fade {
-  animation: fadeIn 0.8s ease-out;
+  animation: fadeIn 0.6s ease-out;
 }
 
 @keyframes fadeIn {
@@ -8,13 +8,29 @@
   to { opacity: 1; transform: translateY(0); }
 }
 
-/* 💀 Skeleton Loading Shimmer */
-.skeleton-card {
-  height: 400px;
-  background: linear-gradient(90deg, #111 25%, #222 50%, #111 75%);
-  background-size: 200% 100%;
-  animation: shimmer 1.5s infinite;
+/* 💎 Card & Glow Styling */
+.glass {
+  background: rgba(255, 255, 255, 0.03);
+  backdrop-filter: blur(15px);
+  border: 1px solid rgba(255, 255, 255, 0.1);
   border-radius: 20px;
+  transition: 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+
+.glass:hover {
+  border-color: #a855f7;
+  box-shadow: 0 0 25px rgba(168, 85, 247, 0.3);
+  transform: translateY(-5px);
+}
+
+/* 💀 Skeleton Loading Animation */
+.skeleton-card {
+  height: 420px;
+  background: linear-gradient(90deg, #111 25%, #1a1a1a 50%, #111 75%);
+  background-size: 200% 100%;
+  animation: shimmer 1.5s infinite linear;
+  border-radius: 20px;
+  border: 1px solid #222;
 }
 
 @keyframes shimmer {
@@ -22,23 +38,13 @@
   100% { background-position: -200% 0; }
 }
 
-/* 💎 Glass Card & Glow */
-.glass {
-  background: rgba(255, 255, 255, 0.03);
-  backdrop-filter: blur(15px);
-  border: 1px solid rgba(255, 255, 255, 0.1);
-  border-radius: 20px;
-  transition: 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-}
-
-.glass:hover {
-  border-color: #a855f7;
-  box-shadow: 0 0 25px rgba(168, 85, 247, 0.3);
-  transform: scale(1.02);
+.buy-btn {
+  transition: 0.3s;
+  font-weight: 800;
 }
 
 .buy-btn:hover:not(:disabled) {
-  background: #a855f7;
-  color: white;
+  background: #a855f7 !important;
+  color: white !important;
   box-shadow: 0 0 15px #a855f7;
 }
