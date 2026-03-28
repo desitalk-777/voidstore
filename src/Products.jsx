@@ -16,8 +16,8 @@ export default function Products() {
   }, []);
 
   const handleBuy = (item) => {
-    const phone = "919596491283"; // Apna real number dalo
-    const text = `*Order Request* 🛒\n*Product:* ${item.name}\n*Price:* ₹${item.price}\n*Details:* ${item.description}\n\nBhai, stock mein hai?`;
+    const phone = "919596491283"; // Apna number dalo
+    const text = `*VOID STORE ORDER*\n\n*Product:* ${item.name}\n*Details:* ${item.description}\n*Price:* ₹${item.price}\n\nStock check please!`;
     window.open(`https://wa.me/${phone}?text=${encodeURIComponent(text)}`, '_blank');
   };
 
@@ -26,10 +26,10 @@ export default function Products() {
   return (
     <div style={{ padding: '0 8% 100px' }}>
       
-      {/* Categories */}
+      {/* Category Tabs */}
       <div style={{ display: 'flex', gap: '10px', margin: '40px 0', justifyContent: 'center' }}>
         {['all', 'gaming', 'ott', 'ai'].map(cat => (
-          <button key={cat} onClick={() => setFilter(cat)} style={{ padding: '10px 20px', borderRadius: '20px', border: 'none', background: filter === cat ? '#a855f7' : '#111', color: 'white', cursor: 'pointer' }}>
+          <button key={cat} onClick={() => setFilter(cat)} style={{ padding: '10px 20px', borderRadius: '20px', border: 'none', background: filter === cat ? '#a855f7' : '#111', color: 'white', cursor: 'pointer', fontWeight: 'bold' }}>
             {cat.toUpperCase()}
           </button>
         ))}
@@ -37,15 +37,14 @@ export default function Products() {
 
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))', gap: '25px' }}>
         
-        {/* 💀 Skeleton Loading Animation */}
         {loading ? [1, 2, 3].map(n => (
-          <div key={n} className="glass skeleton" style={{ height: '400px', padding: '25px' }}></div>
+          <div key={n} className="glass skeleton" style={{ height: '420px', padding: '25px' }}></div>
         )) : (
           filteredItems.map(item => (
-            <div key={item.id} className="glass" style={{ padding: '25px', position: 'relative', opacity: item.stock > 0 ? 1 : 0.6 }}>
+            <div key={item.id} className="glass page-fade" style={{ padding: '25px', position: 'relative', opacity: item.stock > 0 ? 1 : 0.6 }}>
               
-              {/* Manual Stock Badge */}
-              <div style={{ position: 'absolute', top: '15px', right: '15px', padding: '5px 10px', borderRadius: '5px', fontSize: '10px', background: item.stock > 0 ? '#22c55e' : '#ef4444' }}>
+              {/* Stock Label */}
+              <div style={{ position: 'absolute', top: '15px', right: '15px', padding: '5px 10px', borderRadius: '5px', fontSize: '10px', fontWeight: 'bold', background: item.stock > 0 ? '#22c55e' : '#ef4444' }}>
                 {item.stock > 0 ? `IN STOCK: ${item.stock}` : "OUT OF STOCK"}
               </div>
 
@@ -54,9 +53,10 @@ export default function Products() {
               </div>
 
               <div style={{ margin: '20px 0' }}>
-                <h3 style={{ fontSize: '20px' }}>{item.name}</h3>
-                <p style={{ color: '#aaa', fontSize: '12px', margin: '10px 0' }}>{item.description}</p>
-                <h2 style={{ color: '#00ffff' }}>₹{item.price}</h2>
+                <span style={{ color: '#a855f7', fontSize: '11px', fontWeight: 'bold' }}>{item.category?.toUpperCase()}</span>
+                <h3 style={{ fontSize: '22px', marginTop: '5px' }}>{item.name}</h3>
+                <p style={{ color: '#aaa', fontSize: '13px', margin: '10px 0', minHeight: '40px' }}>{item.description}</p>
+                <h2 style={{ color: '#00ffff', fontWeight: '900' }}>₹{item.price}</h2>
               </div>
               
               <button 
