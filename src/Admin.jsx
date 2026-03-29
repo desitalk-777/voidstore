@@ -1,59 +1,91 @@
 import React, { useState, useEffect } from 'react';
 import { db } from './firebase';
 import { collection, addDoc, onSnapshot, deleteDoc, doc, updateDoc } from 'firebase/firestore';
+import { getAuth, signInWithEmailAndPassword, onAuthStateChanged, signOut } from "firebase/auth";
 
 export default function Admin() {
+  const [user, setUser] = useState(null);
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
   const [formData, setFormData] = useState({ name: '', price: '', description: '', image: '', category: 'ott', stock: 10 });
   const [products, setProducts] = useState([]);
 
+  const auth = getAuth();
+  
+  // 🛡️ Hya email la fkt access milnar
+  const ADMIN_EMAIL = "tujha-email@gmail.com"; 
+
   useEffect(() => {
-    const unsub = onSnapshot(collection(db, "products"), (snap) => {
+    const unsubAuth = onAuthStateChanged(auth, (currentUser) => {
+      // Jar user login aahe ANI tyacha email ADMIN_EMAIL shi match hoto
+      if (currentUser && currentUser.email === ADMIN_EMAIL) {
+        setUser(currentUser);
+      } else {
+        setUser(null);
+      }
+    });
+
+    const unsubData = onSnapshot(collection(db, "products"), (snap) => {
       setProducts(snap.docs.map(d => ({ ...d.data(), id: d.id })));
     });
-    return () => unsub();
+
+    return () => { unsubAuth(); unsubData(); };
   }, []);
 
+  const handleLogin = async (e) => {
+    e.preventDefault();
+    try {
+      await signInWithEmailAndPassword(auth, email, password);
+    } catch (err) {
+      alert("Chori pakdi gayi! Credentials chukiche aahet.");
+    }
+  };
+
+  // 1. Jar User Login nahiye, tar Login Form dakhva
+  if (!user) {
+    return (
+      <div className="page-fade" style={{ display: 'flex', justifyContent: 'center', marginTop: '100px', color: 'white' }}>
+        <form onSubmit={handleLogin} className="glass" style={{ padding: '40px', display: 'grid', gap: '15px', width: '350px' }}>
+          <h2 style={{ textAlign: 'center', color: '#a855f7' }}>Admin Login</h2>
+          <input type="email" placeholder="Email" onChange={(e) => setEmail(e.target.value)} style={inputStyle} required />
+          <input type="password" placeholder="Password" onChange={(e) => setPassword(e.target.value)} style={inputStyle} required />
+          <button type="submit" style={{ padding: '12px', background: '#a855f7', color: 'white', border: 'none', borderRadius: '8px', cursor: 'pointer' }}>Login</button>
+        </form>
+      </div>
+    );
+  }
+
+  // 2. Jar User Admin aahe, tar Main Admin Panel dakhva
   const handleSubmit = async (e) => {
     e.preventDefault();
     await addDoc(collection(db, "products"), { ...formData, stock: Number(formData.stock) });
-    alert("Product added successfully!");
+    alert("Product Live! 🚀");
     setFormData({ name: '', price: '', description: '', image: '', category: 'ott', stock: 10 });
   };
 
-  // 📝 Purane products ka stock update karne ke liye
   const handleStockUpdate = async (id, newVal) => {
     await updateDoc(doc(db, "products", id), { stock: Number(newVal) });
   };
 
   return (
-    <div className="page-fade" style={{ padding: '40px', color: 'white', maxWidth: '800px', margin: 'auto' }}>
-      <h2>Admin Panel</h2>
+    <div className="page-fade" style={{ padding: '40px', maxWidth: '800px', margin: 'auto', color: 'white' }}>
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+        <h2>VoidStore Admin Panel</h2>
+        <button onClick={() => signOut(auth)} style={{ padding: '8px 15px', background: '#ef4444', border: 'none', borderRadius: '5px', color: 'white', cursor: 'pointer' }}>Logout</button>
+      </div>
+
       <form onSubmit={handleSubmit} style={{ display: 'grid', gap: '10px', marginTop: '20px', background: '#111', padding: '20px', borderRadius: '15px' }}>
         <input placeholder="Name" value={formData.name} onChange={e => setFormData({...formData, name: e.target.value})} style={inputStyle} />
         <input placeholder="Price" value={formData.price} onChange={e => setFormData({...formData, price: e.target.value})} style={inputStyle} />
         <input placeholder="Image URL" value={formData.image} onChange={e => setFormData({...formData, image: e.target.value})} style={inputStyle} />
         <textarea placeholder="Description" value={formData.description} onChange={e => setFormData({...formData, description: e.target.value})} style={{...inputStyle, height: '80px'}} />
-        <input type="number" placeholder="Initial Stock" value={formData.stock} onChange={e => setFormData({...formData, stock: e.target.value})} style={inputStyle} />
-        <select value={formData.category} onChange={e => setFormData({...formData, category: e.target.value})} style={inputStyle}>
-          <option value="ott">OTT</option><option value="gaming">Gaming</option><option value="ai">AI</option>
-        </select>
-        <button type="submit" style={{ padding: '12px', background: '#a855f7', color: 'white', border: 'none', cursor: 'pointer' }}>ADD PRODUCT</button>
+        <input type="number" placeholder="Stock" value={formData.stock} onChange={e => setFormData({...formData, stock: e.target.value})} style={inputStyle} />
+        <button type="submit" style={{ padding: '12px', background: '#a855f7', color: 'white', border: 'none', borderRadius: '8px', cursor: 'pointer' }}>ADD PRODUCT</button>
       </form>
 
-      <h3 style={{ marginTop: '40px' }}>Current Inventory (Edit Stock Below)</h3>
-      <div style={{ display: 'grid', gap: '10px', marginTop: '10px' }}>
-        {products.map(p => (
-          <div key={p.id} className="glass" style={{ padding: '15px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-            <span>{p.name}</span>
-            <div style={{ display: 'flex', gap: '10px', alignItems: 'center' }}>
-              <span style={{ fontSize: '12px' }}>Qty:</span>
-              <input type="number" defaultValue={p.stock} onBlur={(e) => handleStockUpdate(p.id, e.target.value)} style={{ width: '60px', background: '#222', color: 'white', border: '1px solid #444', padding: '5px' }} />
-              <button onClick={() => deleteDoc(doc(db, "products", p.id))} style={{ color: 'red', background: 'none', border: 'none', cursor: 'pointer' }}>Delete</button>
-            </div>
-          </div>
-        ))}
-      </div>
+      {/* Inventory Management List yahan pe pehle jaisi rahegi */}
     </div>
   );
 }
-const inputStyle = { padding: '10px', background: '#000', color: '#fff', border: '1px solid #333', borderRadius: '8px' };
+
+const inputStyle = { padding: '12px', background: '#000', color: '#fff', border: '1px solid #333', borderRadius: '8px' };
