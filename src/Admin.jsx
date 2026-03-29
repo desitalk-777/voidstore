@@ -21,7 +21,7 @@ export default function Admin() {
         if (currentUser.email === ADMIN_EMAIL) {
           setUser(currentUser);
         } else {
-          setUser("DENIED"); // Special state for unauthorized users
+          setUser("DENIED"); 
         }
       } else {
         setUser(null);
@@ -42,7 +42,6 @@ export default function Admin() {
 
   if (isAuthChecking) return <div style={{color: 'white', textAlign: 'center', marginTop: '100px'}}>Loading Security...</div>;
 
-  // 1. ❌ ACCESS DENIED SCREEN (Agar koi aur login kare)
   if (user === "DENIED") {
     return (
       <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', marginTop: '150px', color: '#ff4444' }}>
@@ -53,7 +52,6 @@ export default function Admin() {
     );
   }
 
-  // 2. 🔑 LOGIN SCREEN (Starting state)
   if (!user) {
     return (
       <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', marginTop: '150px', color: 'white' }}>
@@ -65,10 +63,10 @@ export default function Admin() {
     );
   }
 
-  // 3. ✅ TERA PURANA ASLI FORM (Sab wapas aa gaya!)
   const handleSubmit = async (e) => {
     e.preventDefault();
-    await addDoc(collection(db, "products"), { ...formData, price: Number(formData.price), stock: Number(formData.stock) });
+    // 📝 Price ko Number() se hata kar simple formData.price rakha hai
+    await addDoc(collection(db, "products"), { ...formData, price: formData.price, stock: Number(formData.stock) });
     alert("Product Live! 🚀");
     setFormData({ name: '', price: '', description: '', image: '', category: 'ott', stock: 10 });
   };
@@ -86,7 +84,8 @@ export default function Admin() {
 
       <form onSubmit={handleSubmit} style={{ display: 'grid', gap: '10px', marginTop: '20px', background: '#111', padding: '25px', borderRadius: '15px', border: '1px solid #333' }}>
         <input placeholder="Product Name" value={formData.name} onChange={e => setFormData({...formData, name: e.target.value})} style={inputStyle} required />
-        <input type="number" placeholder="Price (₹)" value={formData.price} onChange={e => setFormData({...formData, price: e.target.value})} style={inputStyle} required />
+        {/* 📝 type="text" kar diya taaki characters allow hon */}
+        <input type="text" placeholder="Price (e.g. ₹199/mo)" value={formData.price} onChange={e => setFormData({...formData, price: e.target.value})} style={inputStyle} required />
         <input placeholder="Image URL" value={formData.image} onChange={e => setFormData({...formData, image: e.target.value})} style={inputStyle} required />
         <textarea placeholder="Product Description" value={formData.description} onChange={e => setFormData({...formData, description: e.target.value})} style={{...inputStyle, height: '80px'}} required />
         <input type="number" placeholder="Stock" value={formData.stock} onChange={e => setFormData({...formData, stock: e.target.value})} style={inputStyle} required />
