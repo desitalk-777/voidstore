@@ -13,7 +13,7 @@ export default function Admin() {
   const auth = getAuth();
   
   // 🛡️ Hya email la fkt access milnar
-  const ADMIN_EMAIL = "tujha-email@gmail.com"; 
+  const ADMIN_EMAIL = "karanhore18@gmail.com"; 
 
   useEffect(() => {
     const unsubAuth = onAuthStateChanged(auth, (currentUser) => {
